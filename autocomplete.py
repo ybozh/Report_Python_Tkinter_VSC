@@ -21,7 +21,8 @@ class AutocompleteEntry(Entry):
             self.var = self["textvariable"] = StringVar()
 
         self.var.trace('w', self.changed)
-        self.bind("<Right>", self.selection)
+        self.bind("<Double-Button-1>", self.selection)
+        self.bind("<Return>", self.selection)
         self.bind("<Up>", self.up)
         self.bind("<Down>", self.down)
 
@@ -39,6 +40,7 @@ class AutocompleteEntry(Entry):
                     self.lb = Listbox(self.parent)
                     self.lb.bind("<Double-Button-1>", self.selection)
                     self.lb.bind("<Right>", self.selection)
+                    self.lb.bind("<Return>", self.selection)
                     self.lb.place(x=self.winfo_x(), y=self.winfo_y() + self.winfo_height())
                     self.lb_up = True
 
@@ -85,7 +87,7 @@ class AutocompleteEntry(Entry):
                 self.lb.activate(index)
 
     def comparison(self):
-        pattern = re.compile('.*' + self.var.get() + '.*')
+        pattern = re.compile('.*' + self.var.get() + '.*', re.IGNORECASE)
         return [w for w in self.lista if re.match(pattern, w)]
 
 
