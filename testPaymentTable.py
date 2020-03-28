@@ -51,13 +51,13 @@ try:
     except Exception as e:
         pass
     select_payments = connect.execute('''SELECT description FROM payments''')
-    arr_payments = []
+    arr_payments_autocomlete = []
     try:
         arr_payments_fetch = list(select_payments.fetchall())
-        arr_payments.clear()
+        arr_payments_autocomlete.clear()
         for el in arr_payments_fetch:
-            arr_payments.append(el[0])
-        print(arr_payments)
+            arr_payments_autocomlete.append(el[0])
+        print(arr_payments_autocomlete)
     except Exception as e:
         tk.messagebox.showerror("Помилка", "Помилка: " + format(e))
     db.commit()
@@ -149,30 +149,45 @@ def ins_row_arr():
         tablePaymentsUpdate()
         ins_root.destroy()
     ins_root = tk.Toplevel()
-    # ins_root.minsize(width=400,height=200)
-    frm_ent_date = tk.LabelFrame(ins_root, text="Дата платежу")
-    frm_ent_date.grid(row=0, column=0)
-    ent_date = tk.Entry(frm_ent_date)
+    ins_root.minsize(width=1550,height=200)
+
+    frm_ent_date = tk.Frame(ins_root)
+    frm_ent_date.pack(side=tk.LEFT, anchor="nw", fill=tk.Y, padx=15)
+    lbl1 = tk.Label(frm_ent_date, text='Дата платежу:')
+    lbl1.pack(side=tk.LEFT, anchor="nw")
+    ent_date = tk.Entry(frm_ent_date, width=10)
     ent_date.bind('<Button-1>', lambda event: entry_date(ent_date))
-    ent_date.grid(row=0, column=0)
-    frm_ent_desc = tk.LabelFrame(ins_root, text="Назва товару чи послуги")
-    frm_ent_desc.grid(row=0, column=1)
-    ent_desc = tk.Entry(frm_ent_desc, width=50)
-    ent_desc.grid(row=0, column=0)
-    # ent_desc = autocomplete.AutocompleteEntry(arr_payments, frm_ent_desc, width=50)
-    # ent_desc.grid(row=0, column=0, pady=2)
-    frm_ent_sum = tk.LabelFrame(ins_root, text="Сума")
-    frm_ent_sum.grid(row=0, column=2)
+    ent_date.pack(side=tk.LEFT, anchor="nw")
+
+    frm_ent_desc = tk.Frame(ins_root)
+    frm_ent_desc.pack(side=tk.LEFT, anchor="nw", fill=tk.Y, padx=15)
+    lbl2 = tk.Label(frm_ent_desc, text='Найменування платежу:')
+    lbl2.pack(side=tk.LEFT, anchor="nw")
+    ent_desc = autocomplete.AutocompleteEntry(arr_payments_autocomlete, frm_ent_desc, width=50)
+    ent_desc.pack(side=tk.LEFT, anchor="nw")
+
+    frm_ent_sum = tk.Frame(ins_root)
+    frm_ent_sum.pack(side=tk.LEFT, anchor="nw", fill=tk.Y, padx=15)
+    lbl3 = tk.Label(frm_ent_sum, text='Сума:')
+    lbl3.pack(side=tk.LEFT, anchor="nw")
     ent_sum = tk.Entry(frm_ent_sum, width=10)
-    ent_sum.grid(row=0, column=0)
-    frm_check_card = tk.LabelFrame(ins_root, text="Сплачено з корпоративного рахунку")
-    frm_check_card.grid(row=0, column=3)
+    ent_sum.pack(side=tk.LEFT, anchor="nw")
+
+    frm_check_card = tk.Frame(ins_root)
+    frm_check_card.pack(side=tk.LEFT, anchor="nw", fill=tk.Y, padx=15)
+    lbl4 = tk.Label(frm_check_card, text='Сплачено з корпоративного рахунку:')
+    lbl4.pack(side=tk.LEFT, anchor="nw")
     paidByCard = BooleanVar()
     paidByCard.set(0)
     check_card = tk.Checkbutton(frm_check_card, variable=paidByCard, onvalue=1, offvalue=0)
-    check_card.grid(row=0, column=3, padx=110)
-    ins_btn = tk.Button(ins_root, text='Додати платіж', command=lambda:ins_pay_arr(ent_date.get(), ent_desc.get(), ent_sum.get(), paidByCard.get()))
-    ins_btn.grid(row=1, column=0, columnspan=4, sticky='ew')
+    check_card.pack(side=tk.LEFT, anchor="nw")
+
+    main_frame_toplevel_btn = tk.Frame(ins_root)
+    main_frame_toplevel_btn.pack(side=tk.LEFT, anchor="nw", fill=tk.Y, padx=15)
+    ins_btn = tk.Button(main_frame_toplevel_btn, text='Додати платіж', command=lambda:ins_pay_arr(ent_date.get(), ent_desc.get(), ent_sum.get(), paidByCard.get()))
+    ins_btn.pack(side=tk.LEFT, anchor="nw", padx=5)
+    ins_btn_cancel = tk.Button(main_frame_toplevel_btn, text='Відміна', command=lambda:ins_root.destroy())
+    ins_btn_cancel.pack(side=tk.LEFT, anchor="nw")
 
 def del_row_arr():    
     if arr_payments:        
@@ -322,6 +337,29 @@ def entry_date(dt_data):
         code_date = code_date_yy + code_date_mm + code_date_dd
         ent_data_code.delete(0, END)
         ent_data_code.insert(0, result_arr[0][2] + code_date)
+
+def test_toplevel_autocomplete():
+    def test_command():
+            ent1.insert(0, entry.get())
+    tpl1 = tk.Toplevel()
+    tpl1.minsize(500,150)
+    lista = ['a', 'actions', 'additional', 'also', 'an', 'and', 'angle', 'are', 'as', 'be', 'bind', 'bracket', 'brackets',
+            'button', 'can', 'cases', 'configure', 'course', 'detail', 'enter', 'event', 'events', 'example', 'field',
+            'fields', 'for', 'give', 'important', 'in', 'information', 'is', 'it', 'just', 'key', 'keyboard', 'kind',
+            'leave', 'left', 'like', 'manager', 'many', 'match', 'modifier', 'most', 'of', 'or', 'others', 'out', 'part',
+            'simplify', 'space', 'specifier', 'specifies', 'string;', 'that', 'the', 'there', 'to', 'type', 'unless',
+            'use', 'used', 'user', 'various', 'ways', 'we', 'window', 'wish', 'you']
+    # frame1 = tk.Frame(tpl1)
+    # frame1.pack(fill=tk.BOTH, expand=True)
+    frm1 = tk.Frame(tpl1, bg='green')
+    frm1.pack(fill=tk.BOTH, expand=True)
+    entry = autocomplete.AutocompleteEntry(arr_payments, frm1)
+    entry.pack()
+    # ent1 = tk.Entry(frm1)
+    # ent1.grid(row=1,column=0)
+    btn1 = tk.Button(tpl1, text="Hello", command=test_command)
+    btn1.pack()
+
 
 root = tk.Tk()
 root.title("Звіт")
@@ -495,6 +533,9 @@ btn_del_payment = tk.Button(frm_btn_payment, text='Видалити платіж
 btn_del_payment.pack(side=tk.LEFT, padx=1)
 btn_edt_payment = tk.Button(frm_btn_payment, text='Редагувати платіж', command=edt_row_arr)
 btn_edt_payment.pack(side=tk.LEFT, padx=1)
+btn_test_toplevel = tk.Button(frm_btn_payment, text='Тест TopLevel', command=test_toplevel_autocomplete)
+btn_test_toplevel.pack(side=tk.LEFT, padx=1)
+
 
 frm_btn_report = tk.Frame(root)
 frm_btn_report.pack(pady=10, padx=5, anchor="ne")
