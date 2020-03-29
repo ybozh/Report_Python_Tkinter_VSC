@@ -10,8 +10,13 @@ import bd_report_insert
 import Calendar
 import My_Calendar
 from datetime import datetime
+import def_report_date_to_db
 
 autocomplete_name = []
+arr_report_data = []
+arr_payments = []
+arr_pay = []
+arr_paid_card = []
 
 try:
     db = sqlite3.connect('report.db')
@@ -26,10 +31,9 @@ try:
             autocomplete_name.clear()
             for a in emploees_array_turtle:
                 a = list(a)
-                # print(a)
                 del a[0]                
                 autocomplete_name.append(a)
-            print(autocomplete_name)
+            # print(autocomplete_name)
     except Exception as e:
         tk.messagebox.showerror("Помилка", "Помилка: " + format(e))
     connect.execute(
@@ -40,7 +44,7 @@ try:
                 '''CREATE TABLE IF NOT EXISTS payments (id integer primary key, report_code text, date date, description text, sum real, paid_by_card boolean)''')
     connect.execute(
                 '''CREATE TABLE IF NOT EXISTS report (id integer primary key, code text, date date, emploee text, date_of_start date, date_of_finish date, 
-                days integer, sum real, sum_paid real, balance real, customer text, city text)''')
+                days integer, norma_salary_day real, salary_trip real, sum real, sum_paid real, balance real, customer text, city text)''')
     connect.execute(
                 '''CREATE TABLE IF NOT EXISTS norma (id integer primary key, day_salary_norm REAL, country text UNIQUE)''')
     select_norma = connect.execute('''SELECT day_salary_norm FROM norma  WHERE country="по Україні"''')
@@ -58,19 +62,35 @@ try:
         arr_payments_autocomlete.clear()
         for el in arr_payments_fetch:
             arr_payments_autocomlete.append(el[0])
-        print(arr_payments_autocomlete)
+        # print(arr_payments_autocomlete)
     except Exception as e:
         tk.messagebox.showerror("Помилка", "Помилка: " + format(e))
     db.commit()
 except Exception as e:
     tk.messagebox.showerror("Помилка", "Помилка: " + format(e))
 
-arr_report_data = []
-arr_payments = []
-arr_pay = []
-arr_paid_card = []
+def tablePaymentsUpdate():    
+    if arr_payments:        
+        # treeview.insert('', 'end', values=arr_payments[len(arr_payments)-1])
+        for i in treeview.get_children():
+            treeview.delete(i)
+        for payment in arr_payments:
+            treeview.insert('', 'end', values=payment)
+    else: 
+        for i in treeview.get_children():
+            treeview.delete(i)
+    
+    if arr_paid_card:        
+        # treeview.insert('', 'end', values=arr_payments[len(arr_payments)-1])
+        for i in treeview_card.get_children():
+            treeview_card.delete(i)
+        for payment in arr_paid_card:
+            treeview_card.insert('', 'end', values=payment)
+    else: 
+        for i in treeview_card.get_children():
+            treeview_card.delete(i)    
 
-def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, ent_data_finish_bt, ent_data_days_bt, ent_data_sum_day, ent_data_sum_trip, ent_data_name_lat, ent_data_number, arr_payments, arr_paid_card):
+def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, ent_data_finish_bt, ent_data_days_bt, ent_data_sum_day, ent_data_sum_trip, ent_data_name_lat, ent_data_number, arr_payments, arr_paid_card, ent_data_customer, ent_data_city):
     arr_report_data.clear()
     arr_report_data.append(ent_data_name)
     arr_report_data.append(ent_data_date)
@@ -84,7 +104,22 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
     arr_report_data.append(ent_data_number)
     arr_report_data.append(arr_payments)
     arr_report_data.append(arr_paid_card)
-    print(arr_report_data)
+
+    arr_payment_sum = 0
+    arr_payment_sum_card = 0
+    print(arr_payments)
+    for i in arr_payments:
+        arr_payment_sum = arr_payment_sum + float(i[3])
+    for i in arr_payments:
+        if i[4]:
+            arr_payment_sum_card = arr_payment_sum_card + float(i[3])
+    arr_report_data.append(arr_payment_sum)
+    arr_report_data.append(arr_payment_sum_card)
+    arr_payments_balance = arr_payment_sum - arr_payment_sum_card
+    arr_report_data.append(arr_payments_balance)
+    arr_report_data.append(ent_data_customer)
+    arr_report_data.append(ent_data_city)
+    # print(arr_report_data)
     # mbx = tk.messagebox.askokcancel("Звіт", "Ім'я: " + arr_report_data[0] +
     #                                         "\nДата: " + arr_report_data[1] + 
     #                                         "\nКод: " + arr_report_data[2] +
@@ -111,7 +146,50 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
                                             # "\nБаланс: " + arr_report_data[1]
                                             width=750
                                             )
-    mbx.pack()
+    mbx.pack(side=tk.TOP, anchor="nw")
+
+    treeview1 = ttk.Treeview(root_mbx)
+    treeview1.pack(side=tk.TOP,fill=tk.BOTH, expand=1)
+
+    treeview1["columns"]=("one","two","three", "four", "five")
+    treeview1.column("#0", width=50, minwidth=50, stretch=tk.NO)
+    treeview1.column("one", width=100, minwidth=100, stretch=tk.NO)
+    treeview1.column("two", width=100, minwidth=100, stretch=tk.NO)
+    treeview1.column("three", width=400, minwidth=200)
+    treeview1.column("four", width=100, minwidth=50, stretch=tk.NO)
+    treeview1.column("five", width=160, minwidth=50, stretch=tk.NO)
+
+    treeview1.heading("#0",text="ID",anchor=tk.W)
+    treeview1.heading("one", text="Код",anchor=tk.W)
+    treeview1.heading("two", text="Дата",anchor=tk.W)
+    treeview1.heading("three", text="Найменування",anchor=tk.W)
+    treeview1.heading("four", text="Сума",anchor=tk.W)
+    treeview1.heading("five", text="Сплачено з корп. р.",anchor=tk.W)
+
+    if arr_payments:
+        # treeview.insert('', 'end', values=arr_payments[len(arr_payments)-1])
+        for i in treeview1.get_children():
+            treeview1.delete(i)
+        for payment in arr_payments:
+            treeview1.insert('', 'end', values=payment)
+    else: 
+        for i in treeview1.get_children():
+            treeview1.delete(i)
+
+    frm_buttons = tk.Frame(root_mbx)
+    frm_buttons.pack(side=tk.TOP, anchor="nw")
+
+    btn_save_report = tk.Button(frm_buttons, text='Зберегти', command=lambda: def_report_date_to_db.data_to_db(arr_report_data, root_mbx))
+    btn_save_report.pack(side=tk.LEFT)
+
+    btn_save_print_report = tk.Button(frm_buttons, text='Зберегти і надрукувати', command=lambda: print('btn_save_report'))
+    btn_save_print_report.pack(side=tk.LEFT)
+
+    btn_print_report = tk.Button(frm_buttons, text='Надрукувати', command=lambda: print('btn_save_report'))
+    btn_print_report.pack(side=tk.LEFT)
+
+    btn_cancel_without = tk.Button(frm_buttons, text='Відміна', command=lambda: root_mbx.destroy())
+    btn_cancel_without.pack(side=tk.LEFT)
 
 def add_report_print():
     print('add_report_print')
@@ -120,30 +198,9 @@ def report_cancel():
     root.destroy()
     root.quit()
 
-def tablePaymentsUpdate():    
-    if arr_payments:        
-        # treeview.insert('', 'end', values=arr_payments[len(arr_payments)-1])
-        for i in treeview.get_children():
-            treeview.delete(i)
-        for payment in arr_payments:
-            treeview.insert('', 'end', values=payment)
-    else: 
-        for i in treeview.get_children():
-            treeview.delete(i)
-    
-    if arr_paid_card:        
-        # treeview.insert('', 'end', values=arr_payments[len(arr_payments)-1])
-        for i in treeview_card.get_children():
-            treeview_card.delete(i)
-        for payment in arr_paid_card:
-            treeview_card.insert('', 'end', values=payment)
-    else: 
-        for i in treeview_card.get_children():
-            treeview_card.delete(i)
-
 def ins_row_arr():
-    def ins_pay_arr(ent_date, ent_desc, ent_sum, paidByCard):
-        arr_pay = [ent_date, ent_desc, ent_sum, paidByCard]
+    def ins_pay_arr(ent_code, ent_date, ent_desc, ent_sum, paidByCard):
+        arr_pay = [ent_code, ent_date, ent_desc, ent_sum, paidByCard]
         arr_payments.append(arr_pay)
         if paidByCard == True:
             arr_paid_card.append(arr_pay)
@@ -185,7 +242,7 @@ def ins_row_arr():
 
     main_frame_toplevel_btn = tk.Frame(ins_root)
     main_frame_toplevel_btn.pack(side=tk.LEFT, anchor="nw", fill=tk.Y, padx=15)
-    ins_btn = tk.Button(main_frame_toplevel_btn, text='Додати платіж', command=lambda:ins_pay_arr(ent_date.get(), ent_desc.get(), ent_sum.get(), paidByCard.get()))
+    ins_btn = tk.Button(main_frame_toplevel_btn, text='Додати платіж', command=lambda:ins_pay_arr(ent_data_code.get(), ent_date.get(), ent_desc.get(), ent_sum.get(), paidByCard.get()))
     ins_btn.pack(side=tk.LEFT, anchor="nw", padx=5)
     ins_btn_cancel = tk.Button(main_frame_toplevel_btn, text='Відміна', command=lambda:ins_root.destroy())
     ins_btn_cancel.pack(side=tk.LEFT, anchor="nw")
@@ -302,9 +359,6 @@ def result_arr_def():
         temp_arr.append(code)
         temp_arr.append(identific_number)
 
-        # temp_arr2 = autocomplete_name
-        # print(temp_arr2)
-
         for elem in autocomplete_name:
             i = 0
             for elem1 in temp_arr:
@@ -329,27 +383,6 @@ def result_arr_def():
             ent_data_number.delete(0,tk.END) 
             ent_data_number.insert(0, result_arr[0][3]) 
             ent_data_number.selection('<FocusOut>')   
-
-            # Працює добре але багато коду
-            # if name and not date and not text:
-            #     if name in elem:
-            #         result_arr.append(elem)                
-            # elif name and date and not text:
-            #     if name and date in elem:
-            #         result_arr.append(elem)                
-            # elif name and text and not date:
-            #     if name and text in elem:
-            #         result_arr.append(elem)                
-            # elif date and not name and not text:
-            #     if date in elem:
-            #         result_arr.append(elem)                
-            # elif date and text and not name:
-            #     if date and text in elem:
-            #         result_arr.append(elem)                
-            # elif text and not name and not date:
-            #     if text in elem:
-            #         result_arr.append(elem)                
-    # print(result_arr)
 
 def choose_arr_in(ind):
     result_arr_def()
@@ -496,6 +529,12 @@ lbl_data9.pack(anchor="e", pady=1)
 lbl_data10 = tk.Label(frm_col3, text='Ідентифікаційний номер:', font="Ubuntu, 12")
 lbl_data10.pack(anchor="e", pady=1)
 
+lbl_data11 = tk.Label(frm_col3, text='Замовник:', font="Ubuntu, 12")
+lbl_data11.pack(anchor="e", pady=1)
+
+lbl_data12 = tk.Label(frm_col3, text='Місто:', font="Ubuntu, 12")
+lbl_data12.pack(anchor="e", pady=1)
+
 frm_col4 = tk.Frame(frm_data)
 frm_col4.pack(side=tk.LEFT, fill=tk.BOTH)
 
@@ -509,6 +548,15 @@ ent_data_number.pack(pady=1)
 ent_data_number.bind('<FocusIn>', lambda event: choose_arr_in(3))
 ent_data_number.bind('<FocusOut>', lambda event: choose_arr_out())
 
+ent_data_customer = autocomplete.AutocompleteEntry(autocompl_fill, frm_col4, width=35)
+ent_data_customer.pack(pady=1)
+ent_data_customer.bind('<FocusIn>', lambda event: choose_arr_in(3))
+ent_data_customer.bind('<FocusOut>', lambda event: choose_arr_out())
+
+ent_data_city = autocomplete.AutocompleteEntry(autocompl_fill, frm_col4, width=35)
+ent_data_city.pack(pady=1)
+ent_data_city.bind('<FocusIn>', lambda event: choose_arr_in(3))
+ent_data_city.bind('<FocusOut>', lambda event: choose_arr_out())
 
 frm_payments = tk.LabelFrame(root, text="Витрати", font="Ubuntu, 12")
 frm_payments.pack(side=tk.TOP, pady=10, fill=tk.BOTH, expand=1)
@@ -516,18 +564,20 @@ frm_payments.pack(side=tk.TOP, pady=10, fill=tk.BOTH, expand=1)
 treeview = ttk.Treeview(frm_payments)
 treeview.pack(side=tk.TOP,fill=tk.BOTH, expand=1)
 
-treeview["columns"]=("one","two","three", "four")
+treeview["columns"]=("one","two","three", "four", "five")
 treeview.column("#0", width=50, minwidth=270, stretch=tk.NO)
-treeview.column("one", width=100, minwidth=150, stretch=tk.NO)
-treeview.column("two", width=400, minwidth=200)
-treeview.column("three", width=100, minwidth=50, stretch=tk.NO)
-treeview.column("four", width=160, minwidth=50, stretch=tk.NO)
+treeview.column("one", width=100, minwidth=100, stretch=tk.NO)
+treeview.column("two", width=100, minwidth=150, stretch=tk.NO)
+treeview.column("three", width=400, minwidth=200)
+treeview.column("four", width=100, minwidth=50, stretch=tk.NO)
+treeview.column("five", width=160, minwidth=50, stretch=tk.NO)
 
 treeview.heading("#0",text="ID",anchor=tk.W)
-treeview.heading("one", text="Дата",anchor=tk.W)
-treeview.heading("two", text="Найменування",anchor=tk.W)
-treeview.heading("three", text="Сума",anchor=tk.W)
-treeview.heading("four", text="Сплачено з корп. р.",anchor=tk.W)
+treeview.heading("one", text="Код",anchor=tk.W)
+treeview.heading("two", text="Дата",anchor=tk.W)
+treeview.heading("three", text="Найменування",anchor=tk.W)
+treeview.heading("four", text="Сума",anchor=tk.W)
+treeview.heading("five", text="Сплачено з корп. р.",anchor=tk.W)
 
 frm_paid_card = tk.LabelFrame(root, text="Сплачено з кредитного рахунку", font="Ubuntu, 12")
 frm_paid_card.pack(side=tk.TOP, pady=10, fill=tk.BOTH, expand=1)
@@ -535,18 +585,20 @@ frm_paid_card.pack(side=tk.TOP, pady=10, fill=tk.BOTH, expand=1)
 treeview_card = ttk.Treeview(frm_paid_card)
 treeview_card.pack(side=tk.TOP,fill=tk.BOTH, expand=1)
 
-treeview_card["columns"]=("one","two","three", "four")
+treeview_card["columns"]=("one","two","three", "four", "five")
 treeview_card.column("#0", width=50, minwidth=270, stretch=tk.NO)
-treeview_card.column("one", width=100, minwidth=150, stretch=tk.NO)
-treeview_card.column("two", width=400, minwidth=200)
-treeview_card.column("three", width=100, minwidth=50, stretch=tk.NO)
-treeview_card.column("four", width=160, minwidth=50, stretch=tk.NO)
+treeview_card.column("one", width=100, minwidth=100, stretch=tk.NO)
+treeview_card.column("two", width=100, minwidth=150, stretch=tk.NO)
+treeview_card.column("three", width=400, minwidth=200)
+treeview_card.column("four", width=100, minwidth=50, stretch=tk.NO)
+treeview_card.column("five", width=160, minwidth=50, stretch=tk.NO)
 
 treeview_card.heading("#0",text="ID",anchor=tk.W)
-treeview_card.heading("one", text="Дата",anchor=tk.W)
-treeview_card.heading("two", text="Найменування",anchor=tk.W)
-treeview_card.heading("three", text="Сума",anchor=tk.W)
-treeview_card.heading("four", text="Сплачено з корп. р.",anchor=tk.W)
+treeview_card.heading("one", text="Код",anchor=tk.W)
+treeview_card.heading("two", text="Дата",anchor=tk.W)
+treeview_card.heading("three", text="Найменування",anchor=tk.W)
+treeview_card.heading("four", text="Сума",anchor=tk.W)
+treeview_card.heading("five", text="Сплачено з корп. р.",anchor=tk.W)
 
 tablePaymentsUpdate()
 
@@ -563,7 +615,7 @@ btn_edt_payment.pack(side=tk.LEFT, padx=1)
 frm_btn_report = tk.Frame(root)
 frm_btn_report.pack(pady=10, padx=5, anchor="ne")
 
-btn_add_report = tk.Button(frm_btn_report, text='Зберегти звіт', command=lambda:add_report(ent_data_name.get(), ent_data_date.get(), ent_data_code.get(), ent_data_start_bt.get(), ent_data_finish_bt.get(), ent_data_days_bt.get(), ent_data_sum_day.get(), ent_data_sum_trip.get(), ent_data_name_lat.get(), ent_data_number.get(), arr_payments, arr_paid_card))
+btn_add_report = tk.Button(frm_btn_report, text='Зберегти звіт', command=lambda:add_report(ent_data_name.get(), ent_data_date.get(), ent_data_code.get(), ent_data_start_bt.get(), ent_data_finish_bt.get(), ent_data_days_bt.get(), ent_data_sum_day.get(), ent_data_sum_trip.get(), ent_data_name_lat.get(), ent_data_number.get(), arr_payments, arr_paid_card, ent_data_customer.get(), ent_data_city.get()))
 btn_add_report.pack(side=tk.LEFT, padx=1)
 
 btn_add_report_print = tk.Button(frm_btn_report, text='Зберегти і надрукувати звіт', command=add_report_print)
