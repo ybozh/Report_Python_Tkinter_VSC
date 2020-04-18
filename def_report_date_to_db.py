@@ -6,7 +6,8 @@ from tkinter import messagebox
 db = sqlite3.connect('report.db')
 connect = db.cursor()
 def data_to_db(arr_rep_data, win):
-    try:        
+    try:       
+        # print(arr_rep_data) 
         connect.execute('''INSERT INTO report(code, 
                                             date, 
                                             emploee, 
@@ -53,6 +54,6 @@ def data_to_db(arr_rep_data, win):
                                 ))
             db.commit()
         win.destroy()
-        tk.messagebox.showinfo("Інформація", "Інформацію успішно збережено в БД!", parrent=win)
+        tk.messagebox.showinfo("Інформація", "Інформацію успішно збережено в БД!")
     except Exception as e:
         tk.messagebox.showerror("Помилка", "Помилка: " + format(e))

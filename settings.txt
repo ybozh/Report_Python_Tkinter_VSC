@@ -1,0 +1,5 @@
+#Begin
+'time':								+3
+'path_home_dir':					/home/bozhko/Документи/reports/
+'report_name':						FinReport_
+#End

@@ -11,6 +11,9 @@ import Calendar
 import My_Calendar
 from datetime import datetime
 import def_report_date_to_db
+import printing_files
+import createExcel
+import formatting_Excel
 
 autocomplete_name = []
 arr_report_data = []
@@ -104,8 +107,15 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
     arr_report_data.append(ent_data_number)
     arr_report_data.append(arr_payments)
     arr_report_data.append(arr_paid_card)
+    arr_report_data.append(ent_data_customer)
+    arr_report_data.append(ent_data_city)
+
+    dict_report_data = {'name' : ent_data_name, 'date' : ent_data_date, 'code' : ent_data_code, 'start_bt' : ent_data_start_bt, 'finish_bt' : ent_data_finish_bt, 'days_bt' : ent_data_days_bt, 'sum_day' : ent_data_sum_day, 'sum_trip' : ent_data_sum_trip, 'name_lat' : ent_data_name_lat, 'number' : ent_data_number, 'payments' : arr_payments, 'paid_card' : arr_paid_card, 'customer' : ent_data_customer, 'city' : ent_data_city}
+
+    print(dict_report_data['payments'])
 
     arr_payment_sum = 0
+    arr_payment_sum = arr_payment_sum + float(dict_report_data['sum_trip'])
     arr_payment_sum_card = 0
     print(arr_payments)
     for i in arr_payments:
@@ -119,31 +129,32 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
     arr_report_data.append(arr_payments_balance)
     arr_report_data.append(ent_data_customer)
     arr_report_data.append(ent_data_city)
-    # print(arr_report_data)
-    # mbx = tk.messagebox.askokcancel("Звіт", "Ім'я: " + arr_report_data[0] +
-    #                                         "\nДата: " + arr_report_data[1] + 
-    #                                         "\nКод: " + arr_report_data[2] +
-    #                                         "\nДата початку відрядження: " + arr_report_data[3] +
-    #                                         "\nДата закінчення відрядження: " + arr_report_data[4] +
-    #                                         "\nКількість днів у відрядженні: " + arr_report_data[5] +
-    #                                         "\nНорма добових: " + arr_report_data[6] +
-    #                                         "\nСума добових: " + arr_report_data[7]
-    #                                         # "\nСума витрат: " + arr_report_data[1] +
-    #                                         # "\nСплачено з корп. рах.: " + arr_report_data[1] +
-    #                                         # "\nБаланс: " + arr_report_data[1]
-    #                                         )
     root_mbx=tk.Toplevel()
-    mbx = tk.Message(root_mbx, text="Ім'я: \t\t\t\t" + arr_report_data[0] +
-                                            "\nДата: \t\t\t\t" + arr_report_data[1] + 
-                                            "\nКод: \t\t\t\t" + arr_report_data[2] +
-                                            "\nДата початку відрядження: \t" + arr_report_data[3] +
-                                            "\nДата закінчення відрядження: \t" + arr_report_data[4] +
-                                            "\nКількість днів у відрядженні: \t" + arr_report_data[5] +
-                                            "\nНорма добових: \t\t\t" + arr_report_data[6] +
-                                            "\nСума добових: \t\t\t" + arr_report_data[7],
+    mbx = tk.Message(root_mbx, text=# "Ім'я: \t\t\t\t" + arr_report_data[0] +
+                                            # "\nДата: \t\t\t\t" + arr_report_data[1] + 
+                                            # "\nКод: \t\t\t\t" + arr_report_data[2] +
+                                            # "\nДата початку відрядження: \t" + arr_report_data[3] +
+                                            # "\nДата закінчення відрядження: \t" + arr_report_data[4] +
+                                            # "\nКількість днів у відрядженні: \t" + arr_report_data[5] +
+                                            # "\nНорма добових: \t\t\t" + arr_report_data[6] +
+                                            # "\nСума добових: \t\t\t" + arr_report_data[7],
                                             # "\nСума витрат: " + arr_report_data[1] +
                                             # "\nСплачено з корп. рах.: " + arr_report_data[1] +
                                             # "\nБаланс: " + arr_report_data[1]
+                                            "Імʼя: \t\t\t\t" + dict_report_data.get('name') + 
+                                            "\nДата: \t\t\t\t" + dict_report_data.get('date') + 
+                                            "\nКод: \t\t\t\t" + dict_report_data.get('code') +
+                                            "\nМісто: \t\t\t\t" + dict_report_data.get('city') +
+                                            "\nЗамовник: \t\t\t" + dict_report_data.get('customer') +
+                                            "\nДата початку відрядження: \t" + dict_report_data.get('start_bt') +
+                                            "\nДата закінчення відрядження: \t" + dict_report_data.get('finish_bt') +
+                                            "\nКількість днів у відрядженні: \t" + dict_report_data.get('days_bt') +
+                                            "\nНорма добових: \t\t\t" + dict_report_data.get('sum_day') +
+                                            "\nСума добових: \t\t\t" + dict_report_data.get('sum_trip') +
+                                            "\nСума витрат: \t\t\t" + str(arr_payment_sum) +
+                                            "\nСплачено готівкою: \t\t" + str(round(float(arr_payment_sum - arr_payment_sum_card - float(dict_report_data.get('sum_trip'))), 2)) +
+                                            "\nСплачено з корп. рах.: \t\t" + str(arr_payment_sum_card) +
+                                            "\nБаланс: \t\t\t\t" + str(round(arr_payments_balance, 2)),
                                             width=750
                                             )
     mbx.pack(side=tk.TOP, anchor="nw")
@@ -180,6 +191,8 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
     frm_buttons.pack(side=tk.TOP, anchor="nw")
 
     btn_save_report = tk.Button(frm_buttons, text='Зберегти', command=lambda: def_report_date_to_db.data_to_db(arr_report_data, root_mbx))
+    # btn_save_report.bind('<Button-1>', lambda event: createExcel.fill_xls(arr_report_data))
+    btn_save_report.bind('<Button-1>', lambda event: formatting_Excel.test_func(arr_report_data))
     btn_save_report.pack(side=tk.LEFT)
 
     btn_save_print_report = tk.Button(frm_buttons, text='Зберегти і надрукувати', command=lambda: print('btn_save_report'))
