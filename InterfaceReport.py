@@ -14,6 +14,7 @@ import def_report_date_to_db
 import printing_files
 import createExcel
 import formatting_Excel
+import word_docs
 
 autocomplete_name = []
 arr_report_data = []
@@ -127,8 +128,8 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
     arr_report_data.append(arr_payment_sum_card)
     arr_payments_balance = arr_payment_sum - arr_payment_sum_card
     arr_report_data.append(arr_payments_balance)
-    arr_report_data.append(ent_data_customer)
-    arr_report_data.append(ent_data_city)
+    # arr_report_data.append(ent_data_customer)
+    # arr_report_data.append(ent_data_city)
     root_mbx=tk.Toplevel()
     mbx = tk.Message(root_mbx, text=# "Ім'я: \t\t\t\t" + arr_report_data[0] +
                                             # "\nДата: \t\t\t\t" + arr_report_data[1] + 
@@ -190,9 +191,11 @@ def add_report(ent_data_name, ent_data_date, ent_data_code, ent_data_start_bt, e
     frm_buttons = tk.Frame(root_mbx)
     frm_buttons.pack(side=tk.TOP, anchor="nw")
 
-    btn_save_report = tk.Button(frm_buttons, text='Зберегти', command=lambda: def_report_date_to_db.data_to_db(arr_report_data, root_mbx))
+    # btn_save_report = tk.Button(frm_buttons, text='Зберегти', command=lambda: save_report())
+    btn_save_report = tk.Button(frm_buttons, text='Зберегти', command=lambda: (def_report_date_to_db.data_to_db(arr_report_data, root_mbx), save_report()))
     # btn_save_report.bind('<Button-1>', lambda event: createExcel.fill_xls(arr_report_data))
-    btn_save_report.bind('<Button-1>', lambda event: formatting_Excel.test_func(arr_report_data))
+    # btn_save_report.bind('<Button-1>', lambda event: ((formatting_Excel.test_func(arr_report_data, 'template.xlsx', word_docs.filename_create('AR', arr_report_data[2]))), (word_docs.order_from_list(arr_report_data, 'template.docx', word_docs.filename_create('OR', arr_report_data[2])))))
+    # btn_save_report.bind('<Button-1>', lambda event: word_docs.order_from_list(arr_report_data, 'template.docx', word_docs.filename_create('OR', arr_report_data[2])))
     btn_save_report.pack(side=tk.LEFT)
 
     btn_save_print_report = tk.Button(frm_buttons, text='Зберегти і надрукувати', command=lambda: print('btn_save_report'))
@@ -432,6 +435,11 @@ def entry_date(dt_data):
         code_date = code_date_yy + code_date_mm + code_date_dd
         ent_data_code.delete(0,tk.END)
         ent_data_code.insert(0, result_arr[0][2] + code_date)
+
+def save_report():
+    # def_report_date_to_db.data_to_db(arr_report_data, root_mbx)
+    formatting_Excel.test_func(arr_report_data, 'template.xlsx', word_docs.filename_create('AR', arr_report_data[2]))
+    word_docs.order_from_list(arr_report_data, 'template.docx', word_docs.filename_create('OR', arr_report_data[2]))
 
 root = tk.Tk()
 root.title("Звіт")
